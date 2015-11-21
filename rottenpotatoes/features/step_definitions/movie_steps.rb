@@ -13,8 +13,7 @@ end
 #   on the same page
 
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
-  #  ensure that that e1 occurs before e2.
-  #  page.body is the entire content of the page as a string.
+  expect(page.body).to have_content(/#{e1}.*#{e2}/)
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -22,13 +21,27 @@ end
 #  "When I check the following ratings: G"
 
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
-  fail "Unimplemented"
+  trigger = uncheck
+  rating_list.split(',').each do |rating|
+    trigger ? uncheck("ratings_#{rating}") : check("ratings_#{rating}")
+  end
+end
+
+Then /I should see all movies with ratings: (.*)/ do |rating_list|
+  ratings = page.all('#movies tbody tr td:nth-child(2)').map(&:text)
+  rating_list.split(',').each do |rating|
+    expect(ratings).to have_content(rating)
+  end
+end
+
+Then /I should not see movies with ratings: (.*)/ do |rating_list|
+  ratings = page.all('#movies tbody tr td:nth-child(2)').map(&:text)
+  rating_list.split(',').each do |rating|
+    expect(ratings).not_to have_content(/\A#{rating}/)
+  end
 end
 
 Then /I should see all the movies/ do
-  # Make sure that all the movies in the app are visible in the table
-  fail "Unimplemented"
+  number_of_movies = Movie.count
+  expect(page).to have_css('#movies tbody tr', count: number_of_movies)
 end

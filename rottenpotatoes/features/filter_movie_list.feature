@@ -16,17 +16,26 @@ Background: movies have been added to database
   | Amelie                  | R      | 25-Apr-2001  |
   | 2001: A Space Odyssey   | G      | 6-Apr-1968   |
   | The Incredibles         | PG     | 5-Nov-2004   |
-  | Raiders of the Lost Ark | PG     | 12-Jun-1981  |
+  | Raiders of the Lost Ark | PG     | 13-Jun-1981  |
   | Chicken Run             | G      | 21-Jun-2000  |
 
   And  I am on the RottenPotatoes home page
 
 Scenario: restrict to movies with 'PG' or 'R' ratings
-  # enter step(s) to check the 'PG' and 'R' checkboxes
-  # enter step(s) to uncheck all other checkboxes
-  # enter step to "submit" the search form on the homepage
-  # enter step(s) to ensure that PG and R movies are visible
-  # enter step(s) to ensure that other movies are not visible
+  When I check the following ratings: PG,R
+  And I uncheck the following ratings: G,PG-13,NC-17
+  And I press "Refresh"
+  Then I should see all movies with ratings: PG,R
+  And I should not see movies with ratings: G,PG-13,NC-17
 
 Scenario: all ratings selected
-  # see assignment
+  When I check the following ratings: G,PG,PG-13,NC-17,R
+  Then I should see all the movies
+
+Scenario: sort movies alphabetically
+  When I follow "Movie Title"
+  Then I should see "2001: A Space Odyssey" before "Aladdin"
+
+Scenario: sort movies in increasing order of release date
+  When I follow "Release Date"
+  Then I should see "1968-04-06" before "1981-06-13"
